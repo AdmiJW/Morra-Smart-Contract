@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter } from "react-router-dom";
+import { HashRouter } from "react-router-dom";
 
 import NavBar from "./views/components/Navbar";
 import AppRoutes from "./AppRoutes";
@@ -12,13 +12,13 @@ function App() {
     return <>
         <NavBar />
 
-        <BrowserRouter>
+        <HashRouter>
             <RoutedContextGroup>
                 <Container className="d-flex flex-column align-items-center py-5">
                     <AppRoutes />
                 </Container>
             </RoutedContextGroup>
-        </BrowserRouter>
+        </HashRouter>
     </>;
 }
 
