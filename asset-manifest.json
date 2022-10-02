@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/static/css/main.93132735.css",
-    "main.js": "/static/js/main.bc68ca7c.js",
-    "index.html": "/index.html",
-    "main.93132735.css.map": "/static/css/main.93132735.css.map",
-    "main.bc68ca7c.js.map": "/static/js/main.bc68ca7c.js.map"
+    "main.css": "/Morra-Smart-Contract/static/css/main.93132735.css",
+    "main.js": "/Morra-Smart-Contract/static/js/main.681a16ed.js",
+    "index.html": "/Morra-Smart-Contract/index.html",
+    "main.93132735.css.map": "/Morra-Smart-Contract/static/css/main.93132735.css.map",
+    "main.681a16ed.js.map": "/Morra-Smart-Contract/static/js/main.681a16ed.js.map"
   },
   "entrypoints": [
     "static/css/main.93132735.css",
-    "static/js/main.bc68ca7c.js"
+    "static/js/main.681a16ed.js"
   ]
 }
