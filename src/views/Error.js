@@ -18,7 +18,7 @@ export default function Error() {
 
         <p className='text-center lead'> {detail} </p>
 
-        <Button variant="contained" size='large' onClick={ ()=> window.location.href = '/' }>
+        <Button variant="contained" size='large' onClick={ ()=> window.location.href = process.env.PUBLIC_URL }>
             Refresh
         </Button>
     </>;

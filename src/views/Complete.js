@@ -52,6 +52,6 @@ export default function Complete() {
 
         <AccountDetails />
 
-        <Button variant="contained" size='large' onClick={ ()=> window.location.href = '/' } >Refresh</Button>
+        <Button variant="contained" size='large' onClick={ ()=> window.location.href = process.env.PUBLIC_URL } >Refresh</Button>
     </>;
 }
