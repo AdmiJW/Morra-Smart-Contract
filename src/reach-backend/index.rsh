@@ -1,7 +1,7 @@
 'reach 0.1';
 
 
-const [ isOutcome, TIE, ALICE_WIN, BOB_WIN ] = makeEnum(3); 
+const [ isOutcome, TIE, ALICE_WIN, BOB_WIN, ONGOING ] = makeEnum(4); 
 
 
 function getOutcome(totalFingers, aliceGuess, bobGuess) {
@@ -55,13 +55,39 @@ const MorraPlayerInterface = {
     ...MorraPartipantInterface,
 
     acceptWager: Fun([UInt], Bool),
-    
 };
 
 
+//============================================
+// View Object
+//============================================
+
+const GameInfoInterface = {
+    wager: UInt,
+    deadline: UInt,
+    outcome: UInt,
+    dealerFingers: UInt,
+    playerFingers: UInt,
+    dealerGuess: UInt,
+    playerGuess: UInt,
+};
+
+
+const GameInfoStruct = Struct([
+    ['wager', UInt],
+    ['deadline', UInt],
+    ['outcome', UInt],
+    ['dealerFingers', UInt],
+    ['playerFingers', UInt],
+    ['dealerGuess', UInt],
+    ['playerGuess', UInt],
+]);
 
 
 
+//============================================
+// Smart Contract
+//============================================
 export const main = Reach.App(() => {
     const MorraDealer = Participant('MorraDealer', {
         ...MorraDealerInterface
@@ -69,14 +95,25 @@ export const main = Reach.App(() => {
     const MorraPlayer = Participant('MorraPlayer', {
         ...MorraPlayerInterface
     });
+
+    // View, API, Events
+    const Viewer = View('View', GameInfoInterface);
+    const GameInfoAPI = API("GameInfoAPI", {
+        viewGameInfo: Fun([], GameInfoStruct),
+    });
+    const Notifier = Events({
+        roundConcluded: [UInt, UInt], // [totalFingers, outcome]
+    });
     init();
 
 
+    // Timeout function
     function notifyTimeout() {
         each([MorraDealer, MorraPlayer], ()=> interact.notifyTimeout() );
     }
     
 
+    
 
     MorraDealer.only(()=> {
         const wager = declassify( interact.wager );
@@ -85,21 +122,34 @@ export const main = Reach.App(() => {
     MorraDealer
         .publish(wager, deadline)
         .pay(wager);
+
+    Viewer.wager.set(wager);
+    Viewer.deadline.set(deadline);
+    Viewer.outcome.set(ONGOING);
+
     commit();
 
 
+
+
     MorraPlayer.only(()=> {
-        const acceptWager = declassify( interact.acceptWager(wager) );
+        const _accept = interact.acceptWager(wager);
     });
     MorraPlayer
-        .publish(acceptWager)
         .pay(wager)
         .timeout( relativeTime(deadline), ()=> closeTo(MorraDealer, notifyTimeout) );
     
 
-    var outcome = TIE;
+    var [ outcome, dealerFingers, playerFingers, dealerGuess, playerGuess ] = [ONGOING, 0, 0, 0, 0];
+    { 
+        Viewer.outcome.set(outcome);
+        Viewer.dealerFingers.set(dealerFingers);
+        Viewer.playerFingers.set(playerFingers);
+        Viewer.dealerGuess.set(dealerGuess);
+        Viewer.playerGuess.set(playerGuess);
+    }
     invariant( balance() === wager * 2 && isOutcome(outcome) );
-    while (outcome === TIE) {
+    while (outcome === TIE || outcome === ONGOING) {
         commit();
 
         // Alice move
@@ -159,17 +209,36 @@ export const main = Reach.App(() => {
             interact.seeOutcome(totalFingers, localOutcome);
         });
 
-        outcome = localOutcome;
+        Notifier.roundConcluded(totalFingers, localOutcome);
+        [ outcome, dealerFingers, playerFingers, dealerGuess, playerGuess ] = [localOutcome, aliceFingers, bobFingers, aliceGuess, bobGuess];
         continue;
     }
     
     assert( outcome === ALICE_WIN || outcome === BOB_WIN );
-
-    
     transfer( wager * 2 ).to( outcome === ALICE_WIN ? MorraDealer : MorraPlayer );
-    commit();
-
     each([MorraDealer, MorraPlayer], ()=> interact.concludeGame() );
 
+
+    // Infinite loop via api to keep the smart contract alive
+    const loop = parallelReduce( true )
+        .invariant(loop === true)
+        .while(loop)
+        .api_(GameInfoAPI.viewGameInfo, ()=> {
+            return [ 0, (ret)=> {
+                ret( GameInfoStruct.fromObject({
+                    wager: wager,
+                    deadline: deadline,
+                    outcome: outcome,
+                    dealerFingers: dealerFingers,
+                    playerFingers: playerFingers,
+                    dealerGuess: dealerGuess,
+                    playerGuess: playerGuess,
+                }));
+                return true;
+            }];
+        });
+
+
+    commit();
     exit();
 });

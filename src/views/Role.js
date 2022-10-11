@@ -39,5 +39,13 @@ export default function Role() {
             <Button onClick={ ()=> navigate('/dealer/setup') } >Host a Contract 📃</Button>
             <Button onClick={ ()=> navigate('/player/attach') } >Join a Contract 🔗</Button>
         </ButtonGroup>
+
+        <Typography variant='subtitle1' gutterBottom>
+            Or view the history:
+        </Typography>
+
+        <Button variant='contained' size='large' color='info' onClick={ ()=> navigate('/view') } >
+            View History 🧐
+        </Button>
     </>;
 }

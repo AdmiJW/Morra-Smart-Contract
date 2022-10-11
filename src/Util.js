@@ -17,10 +17,12 @@ stdlib.setWalletFallback(stdlib.walletFallback({
 
 
 export function formatCurrency(amount) {
+    if ( isNaN(amount) ) return '-';
     return stdlib.formatCurrency(amount, 4);
 }
 
 export function parseCurrency(amount) {
+    if ( isNaN(amount) ) return 0;
     return stdlib.parseCurrency(amount);
 }
 
@@ -49,6 +51,7 @@ export function outcomeString(outcome, isDealer) {
 
     outcome = parseInt(outcome);
     if (outcome === 0) return 'Tie';
+    if (outcome === 3) return 'Game ongoing';
     if (outcome === 1) return isDealer ? 'You Won' : 'You Lost';
     if (outcome === 2) return isDealer ? 'You Lost' : 'You Won';
 

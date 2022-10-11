@@ -11,6 +11,7 @@ import Role from "./views/Role";
 import Complete from "./views/Complete";
 import ConnectAccount from "./views/ConnectAccount";
 import Game from "./views/Game";
+import View from "./views/View";
 
 // Fortune Teller views
 import ContractSetup from "./views/MorraDealer/ContractSetup";
@@ -28,6 +29,7 @@ export default function AppRoutes() {
         <Route path="/" element={<ConnectAccount />} />
         <Route path="error" element={<Error />} />
         <Route path="role" element={<Role />} />
+        <Route path='view' element={<View />} />
 
         <Route path='dealer'>
             <Route path="setup" element={<ContractSetup />} />
